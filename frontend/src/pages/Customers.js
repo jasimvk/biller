@@ -1,164 +1,211 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Container,
+  Typography,
+  Snackbar,
+  Alert,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  useTheme,
+  useMediaQuery,
+  Breadcrumbs,
+  Link,
+  Button,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { NavigateNext as NavigateNextIcon } from '@mui/icons-material';
+import CustomerList from '../components/CustomerList';
+import CustomerForm from '../components/CustomerForm';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { BusinessContext } from '../contexts/BusinessContext';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import CustomerService from '../services/customerService';
 
 function Customers() {
   const [customers, setCustomers] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: ''
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  const [formDialog, setFormDialog] = useState({ open: false, mode: 'add', customerId: null });
+  
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+  const { currentBusiness } = useContext(BusinessContext);
 
   useEffect(() => {
+    if (!currentBusiness?.id) {
+      navigate('/businesses');
+      return;
+    }
     fetchCustomers();
-  }, []);
+  }, [currentBusiness?.id, navigate]);
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/customers');
-      const data = await response.json();
-      setCustomers(data.customers);
-    } catch (error) {
-      console.error('Error fetching customers:', error);
+      setLoading(true);
+      setError(null);
+      const data = await CustomerService.fetchCustomers(currentBusiness.id);
+      setCustomers(data);
+    } catch (err) {
+      console.error('Error in fetchCustomers:', err);
+      setError(err.message);
+      showNotification(err.message, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleAddCustomer = () => {
+    setFormDialog({ open: true, mode: 'add', customerId: null });
+  };
+
+  const handleEditCustomer = (customerId) => {
+    setFormDialog({ open: true, mode: 'edit', customerId });
+  };
+
+  const handleDeleteCustomer = async (customerId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/customers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newCustomer),
-      });
-      
-      if (response.ok) {
-        setOpen(false);
-        setNewCustomer({ name: '', email: '', phone: '', address: '' });
-        fetchCustomers();
-      }
-    } catch (error) {
-      console.error('Error adding customer:', error);
+      await CustomerService.deleteCustomer(customerId);
+      setCustomers(prev => prev.filter(c => c.id !== customerId));
+      showNotification('Customer deleted successfully', 'success');
+    } catch (err) {
+      showNotification(err.message, 'error');
     }
   };
 
-  const handleChange = (e) => {
-    setNewCustomer({
-      ...newCustomer,
-      [e.target.name]: e.target.value
-    });
+  const handleSubmit = async (formData) => {
+    try {
+      if (formDialog.mode === 'add') {
+        await CustomerService.createCustomer({
+          ...formData,
+          business_id: currentBusiness.id
+        });
+      } else {
+        await CustomerService.updateCustomer(formDialog.customerId, {
+          ...formData,
+          business_id: currentBusiness.id
+        });
+      }
+      
+      await fetchCustomers();
+      setFormDialog({ open: false, mode: 'add', customerId: null });
+      showNotification(
+        `Customer ${formDialog.mode === 'add' ? 'added' : 'updated'} successfully`,
+        'success'
+      );
+    } catch (err) {
+      showNotification(err.message, 'error');
+      throw err;
+    }
   };
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <h1>Customers</h1>
+  const showNotification = (message, severity = 'success') => {
+    setNotification({ open: true, message, severity });
+  };
+
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
+
+  // Show business selection prompt if no business is selected
+  if (!currentBusiness?.id) {
+    return (
+      <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom>
+          Please Select a Business
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          You need to select a business before managing customers.
+        </Typography>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
+          color="primary"
+          onClick={() => navigate('/businesses')}
         >
-          Add Customer
+          Select Business
         </Button>
+      </Container>
+    );
+  }
+
+  if (loading) {
+    return <LoadingSpinner message="Loading customers..." />;
+  }
+
+  return (
+    <Container maxWidth="xl">
+      <Box sx={{ py: 4 }}>
+        <Breadcrumbs 
+          separator={<NavigateNextIcon fontSize="small" />}
+          sx={{ mb: 3 }}
+        >
+          <Link component={RouterLink} to="/" color="inherit">
+            Dashboard
+          </Link>
+          <Link component={RouterLink} to="/businesses" color="inherit">
+            {currentBusiness.tradeName}
+          </Link>
+          <Typography color="text.primary">Customers</Typography>
+        </Breadcrumbs>
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1">
+            Customers
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            {currentBusiness.tradeName}
+          </Typography>
+        </Box>
+
+        {error ? (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        ) : (
+          <CustomerList
+            customers={customers}
+            onEdit={handleEditCustomer}
+            onDelete={handleDeleteCustomer}
+            onAdd={handleAddCustomer}
+          />
+        )}
+
+        <Dialog
+          fullScreen={fullScreen}
+          maxWidth="md"
+          fullWidth
+          open={formDialog.open}
+          onClose={() => setFormDialog({ open: false, mode: 'add', customerId: null })}
+        >
+          <CustomerForm
+            initialValues={
+              formDialog.mode === 'edit'
+                ? customers.find(c => c.id === formDialog.customerId)
+                : {}
+            }
+            isEdit={formDialog.mode === 'edit'}
+            onSubmit={handleSubmit}
+            onCancel={() => setFormDialog({ open: false, mode: 'add', customerId: null })}
+          />
+        </Dialog>
+
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={6000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleCloseNotification}
+            severity={notification.severity}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
       </Box>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Address</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell>{customer.id}</TableCell>
-                <TableCell>{customer.name}</TableCell>
-                <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.phone}</TableCell>
-                <TableCell>{customer.address}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle>Add New Customer</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              name="name"
-              label="Name"
-              type="text"
-              fullWidth
-              required
-              value={newCustomer.name}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              name="email"
-              label="Email"
-              type="email"
-              fullWidth
-              value={newCustomer.email}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              name="phone"
-              label="Phone"
-              type="tel"
-              fullWidth
-              value={newCustomer.phone}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              name="address"
-              label="Address"
-              type="text"
-              fullWidth
-              multiline
-              rows={3}
-              value={newCustomer.address}
-              onChange={handleChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained">Add</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </Box>
+    </Container>
   );
 }
 

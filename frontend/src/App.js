@@ -1,63 +1,95 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
-
-import Layout from './components/Layout/Layout';
-import Dashboard from './pages/Dashboard';
-import Customers from './pages/Customers';
-import Products from './pages/Products';
-import Invoices from './pages/Invoices';
-import CreateInvoice from './pages/CreateInvoice';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
 import Registration from './pages/Registration';
+import BusinessList from './pages/BusinessList';
+import InvoiceSettings from './pages/InvoiceSettings';
+import Invoice from './pages/Invoice';
 
 const theme = createTheme({
   palette: {
     primary: {
       main: '#2563eb',
       light: '#60a5fa',
-      dark: '#1e40af',
+      dark: '#1d4ed8',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#7c3aed',
-      light: '#a78bfa',
-      dark: '#5b21b6',
+      main: '#475569',
+      light: '#64748b',
+      dark: '#334155',
     },
     background: {
       default: '#f8fafc',
       paper: '#ffffff',
     },
+    text: {
+      primary: '#1e293b',
+      secondary: '#475569',
+    },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: [
+      'Inter',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
     h1: {
-      fontSize: '2rem',
-      fontWeight: 600,
+      fontWeight: 700,
     },
     h2: {
-      fontSize: '1.75rem',
-      fontWeight: 600,
+      fontWeight: 700,
     },
     h3: {
-      fontSize: '1.5rem',
       fontWeight: 600,
     },
+    h4: {
+      fontWeight: 600,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+    button: {
+      textTransform: 'none',
+      fontWeight: 500,
+    },
+  },
+  shape: {
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           borderRadius: 8,
-          textTransform: 'none',
-          fontWeight: 500,
+          padding: '8px 16px',
+          fontSize: '0.9375rem',
+        },
+        contained: {
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          },
         },
       },
     },
-    MuiPaper: {
+    MuiTextField: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+          },
         },
       },
     },
@@ -65,7 +97,14 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
         },
       },
     },
@@ -76,18 +115,15 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/register" element={<Registration />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/invoices/create" element={<CreateInvoice />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<Registration />} />
+          <Route path="/businesses" element={<BusinessList />} />
+          <Route path="/invoice-settings" element={<InvoiceSettings />} />
+          <Route path="/invoice" element={<Invoice />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }

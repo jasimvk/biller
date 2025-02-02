@@ -2,6 +2,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "idb": "^8.0.2",
+    "pako": "^2.1.0",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }

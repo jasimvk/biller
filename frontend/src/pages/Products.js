@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
+  Container,
   Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  Typography,
+  Snackbar,
+  Alert,
+  CircularProgress
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import ProductList from '../components/ProductList';
+import { productService } from '../services/productService';
 
 function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    price: '',
-    description: ''
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
   });
 
   useEffect(() => {
@@ -32,126 +27,74 @@ function Products() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products');
-      const data = await response.json();
-      setProducts(data.products);
+      const data = await productService.getAllProducts();
+      setProducts(data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      showNotification('Error fetching products', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleEdit = (productId) => {
+    navigate(`/products/edit/${productId}`);
+  };
+
+  const handleDelete = async (productId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...newProduct,
-          price: parseFloat(newProduct.price)
-        }),
-      });
-      
-      if (response.ok) {
-        setOpen(false);
-        setNewProduct({ name: '', price: '', description: '' });
-        fetchProducts();
-      }
+      await productService.deleteProduct(productId);
+      setProducts(products.filter(p => p.id !== productId));
+      showNotification('Product deleted successfully', 'success');
     } catch (error) {
-      console.error('Error adding product:', error);
+      showNotification('Error deleting product', 'error');
     }
   };
 
-  const handleChange = (e) => {
-    setNewProduct({
-      ...newProduct,
-      [e.target.name]: e.target.value
+  const showNotification = (message, severity) => {
+    setNotification({
+      open: true,
+      message,
+      severity
     });
   };
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <h1>Products</h1>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
-        >
-          Add Product
-        </Button>
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
       </Box>
+    );
+  }
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Description</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.id}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
-                <TableCell>{product.description}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Products
+        </Typography>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle>Add New Product</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              name="name"
-              label="Name"
-              type="text"
-              fullWidth
-              required
-              value={newProduct.name}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              name="price"
-              label="Price"
-              type="number"
-              fullWidth
-              required
-              inputProps={{ min: "0", step: "0.01" }}
-              value={newProduct.price}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              name="description"
-              label="Description"
-              type="text"
-              fullWidth
-              multiline
-              rows={3}
-              value={newProduct.description}
-              onChange={handleChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained">Add</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </Box>
+        <ProductList
+          products={products}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={6000}
+          onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+            severity={notification.severity}
+            variant="filled"
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </Container>
   );
 }
 
