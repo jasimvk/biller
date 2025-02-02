@@ -103,32 +103,7 @@ function HomePage() {
           >
             BILLER
           </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button 
-              variant="contained" 
-              onClick={() => navigate('/businesses')}
-              sx={{
-                px: 3,
-                fontWeight: 600,
-                textTransform: 'none',
-                borderRadius: '8px'
-              }}
-            >
-              View Businesses
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={() => navigate('/register')}
-              sx={{
-                px: 3,
-                fontWeight: 600,
-                textTransform: 'none',
-                borderRadius: '8px'
-              }}
-            >
-              Register Business
-            </Button>
-          </Stack>
+           
         </Toolbar>
       </AppBar>
 
