@@ -61,7 +61,7 @@ function BusinessList() {
   );
 
   const renderBusinessCard = (business) => (
-    <Grid item xs={12} md={6} lg={4} key={business.id}>
+    <Grid item xs={12} sm={6} lg={4} key={business.id}>
       <Card 
         elevation={2}
         sx={{
@@ -75,10 +75,23 @@ function BusinessList() {
           },
         }}
       >
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <BusinessIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: { xs: 1, sm: 2 },
+            mb: 2 
+          }}>
+            <BusinessIcon color="primary" />
+            <Typography 
+              variant="h6" 
+              component="h2" 
+              sx={{ 
+                fontWeight: 600,
+                fontSize: { xs: '1rem', sm: '1.25rem' }
+              }}
+            >
               {business.tradeName}
             </Typography>
           </Box>
@@ -89,7 +102,10 @@ function BusinessList() {
             color="primary"
             variant="outlined"
             size="small"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+            }}
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -114,8 +130,27 @@ function BusinessList() {
             </Typography>
           </Box>
 
-          {/* Add Create Invoice Button */}
-          
+          <Box sx={{ 
+            mt: 'auto', 
+            display: 'flex', 
+            justifyContent: 'flex-end' 
+          }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<ReceiptIcon />}
+              onClick={() => navigate('/invoice', { state: { businessId: business.id } })}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                px: { xs: 2, sm: 3 },
+                py: { xs: 1, sm: 1.5 },
+                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              }}
+            >
+              Create Invoice
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Grid>
@@ -128,9 +163,9 @@ function BusinessList() {
       flexDirection: 'column',
       bgcolor: 'background.default'
     }}>
-      {/* Navigation */}
-      <AppBar position="fixed" elevation={0} sx={{ bgcolor: 'transparent', boxShadow: 1 }}>
-        <Toolbar sx={{ bgcolor: 'rgba(255, 255, 255, 0.95)' }}>
+      {/* Responsive AppBar */}
+      <AppBar position="fixed" elevation={0} sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'grey.200' }}>
+        <Toolbar sx={{ flexWrap: 'wrap' }}>
           <Typography 
             variant="h6" 
             component="div" 
@@ -138,7 +173,8 @@ function BusinessList() {
               flexGrow: 1, 
               color: theme.palette.primary.main, 
               fontWeight: 700,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: { xs: '1.2rem', sm: '1.5rem' }
             }}
             onClick={() => navigate('/')}
           >
@@ -147,12 +183,12 @@ function BusinessList() {
         </Toolbar>
       </AppBar>
 
-      {/* Header Section */}
+      {/* Responsive Header */}
       <Box
         sx={{
           background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.dark} 90%)`,
-          pt: 12,
-          pb: 6,
+          pt: { xs: 8, sm: 12 },
+          pb: { xs: 4, sm: 6 },
           color: 'white',
           textAlign: 'center',
           mb: 4
@@ -165,7 +201,7 @@ function BusinessList() {
             sx={{
               fontWeight: 700,
               mb: 2,
-              fontSize: { xs: '2rem', md: '3rem' }
+              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' }
             }}
           >
             Registered Businesses
@@ -175,7 +211,7 @@ function BusinessList() {
             sx={{
               mb: 4,
               opacity: 0.9,
-              fontSize: { xs: '1rem', md: '1.25rem' }
+              fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' }
             }}
           >
             View and manage all registered businesses
@@ -184,11 +220,13 @@ function BusinessList() {
       </Box>
 
       <Container maxWidth="lg" sx={{ flex: 1, mb: 8 }}>
-        {/* Add Create New Invoice Button at the top */}
+        {/* Responsive Search and Create Button */}
         <Box sx={{ 
           display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'stretch',
           mb: 4 
         }}>
           <TextField
@@ -203,20 +241,26 @@ function BusinessList() {
                 </InputAdornment>
               ),
             }}
-            sx={{ width: '100%', maxWidth: 600 }}
+            sx={{ 
+              width: '100%',
+              maxWidth: { sm: '60%' },
+              '& .MuiOutlinedInput-root': {
+                height: { xs: '48px', sm: '56px' }
+              }
+            }}
           />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => navigate('/invoice')}
             sx={{
-              ml: 2,
-              height: 56,
-              px: 3,
+              height: { xs: '48px', sm: '56px' },
+              px: { xs: 2, sm: 3 },
               borderRadius: 2,
               textTransform: 'none',
-              fontSize: '1rem',
+              fontSize: { xs: '0.875rem', sm: '1rem' },
               fontWeight: 600,
+              whiteSpace: 'nowrap',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               '&:hover': {
                 boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
@@ -233,14 +277,15 @@ function BusinessList() {
           </Alert>
         )}
 
-        <Grid container spacing={3}>
+        {/* Responsive Grid */}
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
           {loading ? (
-            // Loading skeletons
+            // Responsive loading skeletons
             [...Array(6)].map((_, index) => (
-              <Grid item xs={12} md={6} lg={4} key={index}>
+              <Grid item xs={12} sm={6} lg={4} key={index}>
                 <Skeleton 
                   variant="rectangular" 
-                  height={200} 
+                  height={{ xs: 180, sm: 200 }} 
                   sx={{ borderRadius: 2 }} 
                 />
               </Grid>
@@ -253,7 +298,10 @@ function BusinessList() {
                 variant="h6" 
                 color="text.secondary" 
                 align="center"
-                sx={{ mt: 4 }}
+                sx={{ 
+                  mt: 4,
+                  fontSize: { xs: '1rem', sm: '1.25rem' }
+                }}
               >
                 No businesses found
               </Typography>

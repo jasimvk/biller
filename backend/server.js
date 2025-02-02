@@ -18,6 +18,7 @@ const port = process.env.PORT || 5001;
 // Middleware
 app.use(cors({
   origin: ['https://biller-three.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 app.use(express.json());
@@ -27,11 +28,21 @@ app.use(morgan('dev'));
 app.use('/api/products', productsRouter(db));
 app.use('/api/business', businessRoutes);
 
+// Health check route
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend API is running' });
+});
+
 // Error handling
 app.use(databaseErrorHandler);
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message || 'Something went wrong!' });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
 // Start server
