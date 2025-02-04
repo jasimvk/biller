@@ -140,11 +140,7 @@ function HomePage() {
               lineHeight: 1.5
             }}
           >
-           The Biller Software is a Unique Self Invoicing Software which helps small and
-medium businesses to generate Invoices with GST, Debit Notes, Credit
-Notes and Delivery Challans to easily manage their business activities. The
-Software provides easy facilitation to enable businesses to file GST Return
-and also generate E-Invoices and E-Way Bills in real time.
+          Biller is a Unique Self Invoicing Software which helps Small and Medium Business Enterprises (SME's) to generate GST Invoices, Debit Notes, Credit Notes and Delivery Challans to easily manage their Business Operations. Biller also provides easy facilitation to enable businesses to generate E-Way Bills and Monthly GST Reports in real time.
           </Typography>
           <Stack 
             direction={{ xs: 'column', sm: 'row' }} 
@@ -191,7 +187,7 @@ and also generate E-Invoices and E-Way Bills in real time.
                 fontSize: '1.1rem'
               }}
             >
-              View Businesses
+              View Demo
             </Button>
           </Stack>
         </Container>

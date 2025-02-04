@@ -70,6 +70,16 @@ const statesList = [
   { code: '97', name: 'OTHER TERRITORY', shortCode: 'OT' },
 ];
 
+// Add this constant at the top with other constants
+const businessTypes = [
+  { value: 'SOLE_PROPRIETORSHIP', label: 'Sole Proprietorship' },
+  { value: 'PARTNERSHIP_FIRM', label: 'Partnership Firm' },
+  { value: 'PRIVATE_LIMITED', label: 'Private Limited Company' },
+  { value: 'LLP', label: 'Limited Liability Partnership Firm' },
+  { value: 'COOPERATIVE_SOCIETY', label: 'Co-Operative Society' },
+  { value: 'AOP_BOI', label: 'AOP/BOI' }
+];
+
 const emptyAddress = {
   building: '',
   street: '',
@@ -94,7 +104,7 @@ function Registration() {
     legalName: '',
     gstin: '',
     pan: '',
-    udyamNumber: '',
+    constitutionOfBusiness: '',
     mobile: '',
     email: '',
     website: '',
@@ -157,6 +167,10 @@ function Registration() {
     if (!formData.registeredAddress.city) newErrors['registeredAddress.city'] = 'City is required';
     if (!formData.registeredAddress.state) newErrors['registeredAddress.state'] = 'State is required';
     if (!formData.registeredAddress.pinCode) newErrors['registeredAddress.pinCode'] = 'PIN Code is required';
+
+    if (!formData.constitutionOfBusiness) {
+      newErrors.constitutionOfBusiness = 'Constitution of Business is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -620,12 +634,14 @@ function Registration() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Udyam Number"
-                  name="udyamNumber"
-                  value={formData.udyamNumber}
+                  select
+                  label="Constitution of Business"
+                  name="constitutionOfBusiness"
+                  value={formData.constitutionOfBusiness}
                   onChange={handleChange}
-                  error={!!errors.udyamNumber}
-                  helperText={errors.udyamNumber}
+                  required
+                  error={!!errors.constitutionOfBusiness}
+                  helperText={errors.constitutionOfBusiness}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
@@ -644,7 +660,13 @@ function Registration() {
                       color: 'text.secondary',
                     }
                   }}
-                />
+                >
+                  {businessTypes.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -740,11 +762,11 @@ function Registration() {
                 />
               </Grid>
 
-              {/* Registered Address Section */}
+              {/* Principal Place of Business Section */}
               <Grid item xs={12}>
                 <Divider sx={{ my: 4 }} />
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                  Registered Address
+                  Principal Place of Business
                 </Typography>
               </Grid>
 
