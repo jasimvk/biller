@@ -88,6 +88,12 @@ const emptyAddress = {
   pinCode: '',
 };
 
+// Add this constant at the top with other constants
+const registrationTypes = [
+  { value: 'REGULAR', label: 'Regular Supplier' },
+  { value: 'COMPOSITION', label: 'Composition Supplier' }
+];
+
 function Registration() {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -105,12 +111,11 @@ function Registration() {
     gstin: '',
     pan: '',
     constitutionOfBusiness: '',
+    registrationType: '',
     mobile: '',
     email: '',
     website: '',
-    registeredAddress: { ...emptyAddress },
-    branchAddress: { ...emptyAddress },
-    godownAddress: { ...emptyAddress }
+    registeredAddress: { ...emptyAddress }
   });
 
   // Error state
@@ -170,6 +175,10 @@ function Registration() {
 
     if (!formData.constitutionOfBusiness) {
       newErrors.constitutionOfBusiness = 'Constitution of Business is required';
+    }
+
+    if (!formData.registrationType) {
+      newErrors.registrationType = 'Type of Registration is required';
     }
 
     setErrors(newErrors);
@@ -267,6 +276,8 @@ function Registration() {
           value={formData[prefix].building}
           onChange={handleChange}
           required={required}
+          error={!!errors[`${prefix}.building`]}
+          helperText={errors[`${prefix}.building`]}
           sx={textFieldStyle}
         />
       </Grid>
@@ -278,6 +289,8 @@ function Registration() {
           value={formData[prefix].street}
           onChange={handleChange}
           required={required}
+          error={!!errors[`${prefix}.street`]}
+          helperText={errors[`${prefix}.street`]}
           sx={textFieldStyle}
         />
       </Grid>
@@ -289,6 +302,8 @@ function Registration() {
           value={formData[prefix].city}
           onChange={handleChange}
           required={required}
+          error={!!errors[`${prefix}.city`]}
+          helperText={errors[`${prefix}.city`]}
           sx={textFieldStyle}
         />
       </Grid>
@@ -328,6 +343,8 @@ function Registration() {
           value={formData[prefix].pinCode}
           onChange={handleChange}
           required={required}
+          error={!!errors[`${prefix}.pinCode`]}
+          helperText={errors[`${prefix}.pinCode`]}
           sx={textFieldStyle}
         />
       </Grid>
@@ -672,6 +689,44 @@ function Registration() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  select
+                  label="Type of Registration"
+                  name="registrationType"
+                  value={formData.registrationType}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.registrationType}
+                  helperText={errors.registrationType}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: 'grey.50',
+                      '&:hover': {
+                        backgroundColor: 'grey.100',
+                      },
+                      '& fieldset': {
+                        borderColor: 'grey.200',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'primary.main',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: 'text.secondary',
+                    }
+                  }}
+                >
+                  {registrationTypes.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
                   label="Mobile"
                   name="mobile"
                   value={formData.mobile}
@@ -772,62 +827,6 @@ function Registration() {
 
               <Grid item xs={12}>
                 <AddressFields prefix="registeredAddress" required={true} />
-              </Grid>
-
-              {/* Branch Address Section */}
-              <Grid item xs={12}>
-                <Divider sx={{ my: 4 }} />
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, flex: 1 }}>
-                    Branch Address
-                  </Typography>
-                  <Button
-                    onClick={() => toggleSection('branch')}
-                    endIcon={expandedSections.branch ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  >
-                    {expandedSections.branch ? 'Hide' : 'Show'}
-                  </Button>
-                </Box>
-                <Collapse in={expandedSections.branch}>
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      size="small"
-                      startIcon={<ContentCopyIcon />}
-                      onClick={() => copyAddress('registeredAddress', 'branchAddress')}
-                    >
-                      Copy from Registered Address
-                    </Button>
-                  </Box>
-                  <AddressFields prefix="branchAddress" />
-                </Collapse>
-              </Grid>
-
-              {/* Godown Address Section */}
-              <Grid item xs={12}>
-                <Divider sx={{ my: 4 }} />
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, flex: 1 }}>
-                    Godown Address
-                  </Typography>
-                  <Button
-                    onClick={() => toggleSection('godown')}
-                    endIcon={expandedSections.godown ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  >
-                    {expandedSections.godown ? 'Hide' : 'Show'}
-                  </Button>
-                </Box>
-                <Collapse in={expandedSections.godown}>
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      size="small"
-                      startIcon={<ContentCopyIcon />}
-                      onClick={() => copyAddress('registeredAddress', 'godownAddress')}
-                    >
-                      Copy from Registered Address
-                    </Button>
-                  </Box>
-                  <AddressFields prefix="godownAddress" />
-                </Collapse>
               </Grid>
 
               {/* Submit Button */}
