@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -28,6 +28,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
+import _ from 'lodash';  // You'll need to install lodash if not already installed
 
 // Updated state list with GST codes
 const statesList = [
@@ -93,6 +94,144 @@ const registrationTypes = [
   { value: 'REGULAR', label: 'Regular Supplier' },
   { value: 'COMPOSITION', label: 'Composition Supplier' }
 ];
+
+// Separate AddressFields into its own component
+const AddressFields = React.memo(({ prefix, values, onChange, errors, required = false }) => {
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    const fieldName = name.split('.')[1];
+    onChange(prefix, fieldName, value);
+  };
+
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Building/Premises"
+          name={`${prefix}.building`}
+          value={values.building || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.building`]}
+          helperText={errors[`${prefix}.building`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Street"
+          name={`${prefix}.street`}
+          value={values.street || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.street`]}
+          helperText={errors[`${prefix}.street`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="City"
+          name={`${prefix}.city`}
+          value={values.city || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.city`]}
+          helperText={errors[`${prefix}.city`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          select
+          label="State"
+          name={`${prefix}.state`}
+          value={values.state || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.state`]}
+          helperText={errors[`${prefix}.state`] || ' '}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        >
+          {statesList.map((state) => (
+            <MenuItem key={state.code} value={state.name}>
+              {state.name} ({state.code})
+            </MenuItem>
+          ))}
+        </TextField>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="PIN Code"
+          name={`${prefix}.pinCode`}
+          value={values.pinCode || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.pinCode`]}
+          helperText={errors[`${prefix}.pinCode`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+    </Grid>
+  );
+});
 
 function Registration() {
   const theme = useTheme();
@@ -185,9 +324,11 @@ function Registration() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form input changes
+  // Modify the handleChange function to be more efficient
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Batch the state updates
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -197,11 +338,27 @@ function Registration() {
           [child]: value
         }
       }));
+
+      // Clear error if exists
+      if (errors[`${parent}.${child}`]) {
+        setErrors(prev => ({
+          ...prev,
+          [`${parent}.${child}`]: ''
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: value.toUpperCase()
+        [name]: value
       }));
+
+      // Clear error if exists
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: ''
+        }));
+      }
     }
   };
 
@@ -219,6 +376,25 @@ function Registration() {
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  // Update the handleChange function
+  const handleAddressChange = (prefix, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [prefix]: {
+        ...prev[prefix],
+        [field]: value
+      }
+    }));
+
+    // Clear any existing error for this field
+    if (errors[`${prefix}.${field}`]) {
+      setErrors(prev => ({
+        ...prev,
+        [`${prefix}.${field}`]: ''
+      }));
+    }
   };
 
   // Form submission handler
@@ -265,92 +441,6 @@ function Registration() {
     }
   };
 
-  // Address form fields component
-  const AddressFields = ({ prefix, required = false }) => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Building/Premises"
-          name={`${prefix}.building`}
-          value={formData[prefix].building}
-          onChange={handleChange}
-          required={required}
-          error={!!errors[`${prefix}.building`]}
-          helperText={errors[`${prefix}.building`]}
-          sx={textFieldStyle}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          fullWidth
-          label="Street"
-          name={`${prefix}.street`}
-          value={formData[prefix].street}
-          onChange={handleChange}
-          required={required}
-          error={!!errors[`${prefix}.street`]}
-          helperText={errors[`${prefix}.street`]}
-          sx={textFieldStyle}
-        />
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          label="City"
-          name={`${prefix}.city`}
-          value={formData[prefix].city}
-          onChange={handleChange}
-          required={required}
-          error={!!errors[`${prefix}.city`]}
-          helperText={errors[`${prefix}.city`]}
-          sx={textFieldStyle}
-        />
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          select
-          label="State"
-          name={`${prefix}.state`}
-          value={formData[prefix].state}
-          onChange={handleChange}
-          required={required}
-          error={!!errors[`${prefix}.state`]}
-          helperText={errors[`${prefix}.state`] || 'Select state to determine GST code'}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              backgroundColor: 'grey.50',
-              '&:hover': {
-                backgroundColor: 'grey.100',
-              },
-            }
-          }}
-        >
-          {statesList.map((state) => (
-            <MenuItem key={state.code} value={state.name}>
-              {state.name} ({state.code})
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          label="PIN Code"
-          name={`${prefix}.pinCode`}
-          value={formData[prefix].pinCode}
-          onChange={handleChange}
-          required={required}
-          error={!!errors[`${prefix}.pinCode`]}
-          helperText={errors[`${prefix}.pinCode`]}
-          sx={textFieldStyle}
-        />
-      </Grid>
-    </Grid>
-  );
-
   // Common text field style
   const textFieldStyle = {
     '& .MuiOutlinedInput-root': {
@@ -372,6 +462,14 @@ function Registration() {
     
     return gstinRegex.test(gstin);
   };
+
+  // Debounce the validation function
+  const debouncedValidation = React.useCallback(
+    _.debounce((value) => {
+      validateForm();
+    }, 500),
+    []
+  );
 
   return (
     <Box sx={{ 
@@ -826,7 +924,13 @@ function Registration() {
               </Grid>
 
               <Grid item xs={12}>
-                <AddressFields prefix="registeredAddress" required={true} />
+                <AddressFields 
+                  prefix="registeredAddress"
+                  values={formData.registeredAddress}
+                  onChange={handleAddressChange}
+                  errors={errors}
+                  required={true}
+                />
               </Grid>
 
               {/* Submit Button */}
