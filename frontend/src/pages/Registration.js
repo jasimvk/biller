@@ -82,9 +82,12 @@ const businessTypes = [
 ];
 
 const emptyAddress = {
-  building: '',
+  buildingNo: '',
+  premisesName: '',
   street: '',
+  locality: '',
   city: '',
+  district: '',
   state: '',
   pinCode: '',
 };
@@ -105,16 +108,16 @@ const AddressFields = React.memo(({ prefix, values, onChange, errors, required =
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
+      <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
-          label="Building/Premises"
-          name={`${prefix}.building`}
-          value={values.building || ''}
+          label="Building No./Flat No."
+          name={`${prefix}.buildingNo`}
+          value={values.buildingNo || ''}
           onChange={handleFieldChange}
           required={required}
-          error={!!errors[`${prefix}.building`]}
-          helperText={errors[`${prefix}.building`] || ' '}
+          error={!!errors[`${prefix}.buildingNo`]}
+          helperText={errors[`${prefix}.buildingNo`] || ' '}
           inputProps={{
             autoComplete: 'off'
           }}
@@ -129,10 +132,36 @@ const AddressFields = React.memo(({ prefix, values, onChange, errors, required =
           }}
         />
       </Grid>
+
       <Grid item xs={12}>
         <TextField
           fullWidth
-          label="Street"
+          label="Name Of Premises/Building"
+          name={`${prefix}.premisesName`}
+          value={values.premisesName || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.premisesName`]}
+          helperText={errors[`${prefix}.premisesName`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Road/Street"
           name={`${prefix}.street`}
           value={values.street || ''}
           onChange={handleFieldChange}
@@ -153,10 +182,36 @@ const AddressFields = React.memo(({ prefix, values, onChange, errors, required =
           }}
         />
       </Grid>
+
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Locality/Sub Locality"
+          name={`${prefix}.locality`}
+          value={values.locality || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.locality`]}
+          helperText={errors[`${prefix}.locality`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
-          label="City"
+          label="City/Town/Village"
           name={`${prefix}.city`}
           value={values.city || ''}
           onChange={handleFieldChange}
@@ -177,6 +232,32 @@ const AddressFields = React.memo(({ prefix, values, onChange, errors, required =
           }}
         />
       </Grid>
+
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="District"
+          name={`${prefix}.district`}
+          value={values.district || ''}
+          onChange={handleFieldChange}
+          required={required}
+          error={!!errors[`${prefix}.district`]}
+          helperText={errors[`${prefix}.district`] || ' '}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+            },
+            '& .MuiFormHelperText-root': {
+              minHeight: '23px'
+            }
+          }}
+        />
+      </Grid>
+
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
@@ -205,6 +286,7 @@ const AddressFields = React.memo(({ prefix, values, onChange, errors, required =
           ))}
         </TextField>
       </Grid>
+
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
@@ -306,9 +388,12 @@ function Registration() {
     }
 
     // Registered Address validation
-    if (!formData.registeredAddress.building) newErrors['registeredAddress.building'] = 'Building is required';
+    if (!formData.registeredAddress.buildingNo) newErrors['registeredAddress.buildingNo'] = 'Building No. is required';
+    if (!formData.registeredAddress.premisesName) newErrors['registeredAddress.premisesName'] = 'Premises Name is required';
     if (!formData.registeredAddress.street) newErrors['registeredAddress.street'] = 'Street is required';
+    if (!formData.registeredAddress.locality) newErrors['registeredAddress.locality'] = 'Locality is required';
     if (!formData.registeredAddress.city) newErrors['registeredAddress.city'] = 'City is required';
+    if (!formData.registeredAddress.district) newErrors['registeredAddress.district'] = 'District is required';
     if (!formData.registeredAddress.state) newErrors['registeredAddress.state'] = 'State is required';
     if (!formData.registeredAddress.pinCode) newErrors['registeredAddress.pinCode'] = 'PIN Code is required';
 
