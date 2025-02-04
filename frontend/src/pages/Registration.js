@@ -371,6 +371,12 @@ function Registration() {
       newErrors.pan = 'Invalid PAN format';
     }
 
+    // Validate that PAN matches GSTIN
+    if (formData.gstin && formData.pan && formData.gstin.slice(2, 12) !== formData.pan) {
+      newErrors.gstin = 'GSTIN should contain the PAN number';
+      newErrors.pan = 'PAN should match with GSTIN';
+    }
+
     // Mobile validation
     const mobileRegex = /^[6-9]\d{9}$/;
     if (!formData.mobile) {
@@ -412,38 +418,71 @@ function Registration() {
   // Modify the handleChange function to be more efficient
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Batch the state updates
+    let updatedValue = value;
+
+    // Convert to uppercase for GSTIN and PAN
+    if (name === 'gstin' || name === 'pan') {
+      updatedValue = value.toUpperCase();
+    }
+
+    // Update form data
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
+          [child]: updatedValue
         }
       }));
-
-      // Clear error if exists
-      if (errors[`${parent}.${child}`]) {
-        setErrors(prev => ({
-          ...prev,
-          [`${parent}.${child}`]: ''
-        }));
-      }
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: updatedValue
       }));
+    }
 
-      // Clear error if exists
-      if (errors[name]) {
+    // Clear existing error
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+
+    // Real-time validation for GSTIN and PAN
+    if (name === 'gstin' || name === 'pan') {
+      setTimeout(() => {
+        const newErrors = {};
+        
+        if (name === 'gstin' && updatedValue) {
+          if (!validateGSTIN(updatedValue, formData.registeredAddress.state)) {
+            newErrors.gstin = `Invalid GSTIN format. Should start with state code ${
+              statesList.find(s => s.name === formData.registeredAddress.state)?.code || ''
+            }`;
+          }
+        }
+
+        if (name === 'pan' && updatedValue) {
+          const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+          if (!panRegex.test(updatedValue)) {
+            newErrors.pan = 'Invalid PAN format';
+          }
+        }
+
+        // Check if PAN matches GSTIN
+        if (formData.gstin && formData.pan) {
+          if (formData.gstin.slice(2, 12) !== formData.pan) {
+            newErrors.gstin = 'GSTIN should contain the PAN number';
+            newErrors.pan = 'PAN should match with GSTIN';
+          }
+        }
+
         setErrors(prev => ({
           ...prev,
-          [name]: ''
+          ...newErrors
         }));
-      }
+      }, 300);
     }
   };
 
