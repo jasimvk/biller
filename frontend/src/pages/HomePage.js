@@ -171,7 +171,7 @@ function HomePage() {
             <Button
               variant="outlined"
               size="large"
-              onClick={() => navigate('/businesses')}
+              onClick={() => navigate('/dashboard')}
               sx={{
                 color: 'white',
                 borderColor: 'white',

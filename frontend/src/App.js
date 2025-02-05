@@ -8,6 +8,17 @@ import Registration from './pages/Registration';
 import BusinessList from './pages/BusinessList';
 import InvoiceSettings from './pages/InvoiceSettings';
 import Invoice from './pages/Invoice';
+import Dashboard from './pages/Dashboard';
+import BillerMaster from './pages/BillerMaster';
+import InvoiceSetting from './pages/InvoiceSetting';
+import ItemCreation from './pages/ItemCreation';
+import Pricing from './pages/Pricing';
+import LedgerCreation from './pages/LedgerCreation';
+import AccountingVouchers from './pages/AccountingVouchers';
+import BillerReports from './pages/BillerReports';
+import EWayPortal from './pages/EWayPortal';
+import GSTPortal from './pages/GSTPortal';
+import HSNSAC from './pages/HSNSAC';
 
 const theme = createTheme({
   palette: {
@@ -122,7 +133,18 @@ function App() {
           <Route path="/businesses" element={<BusinessList />} />
           <Route path="/invoice-settings" element={<InvoiceSettings />} />
           <Route path="/invoice" element={<Invoice />} />
-        </Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/biller-master" element={<BillerMaster />} />
+          <Route path="/invoice-setting" element={<InvoiceSetting />} />
+          <Route path="/item-creation" element={<ItemCreation />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/ledger-creation" element={<LedgerCreation />} />
+          <Route path="/accounting-vouchers/*" element={<AccountingVouchers />} />
+          <Route path="/biller-reports/*" element={<BillerReports />} />
+          <Route path="/eway-portal" element={<EWayPortal />} />
+          <Route path="/gst-portal" element={<GSTPortal />} />
+          <Route path="/hsn-sac" element={<HSNSAC />} />
+         </Routes>
       </Router>
     </ThemeProvider>
   );
