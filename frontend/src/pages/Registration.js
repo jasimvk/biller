@@ -464,7 +464,7 @@ function Registration() {
         if (name === 'gstin' && updatedValue) {
           if (!validateGSTIN(updatedValue, formData.registeredAddress.state)) {
             if (formData.registeredAddress.state) {
-              const stateCode = statesList.find(s => s.name === formData.registeredAddress.state)?.code;
+              const stateCode = statesList.find(s => s.name === formData.registeredAddress.state)?.code.padStart(2, '0');
               newErrors.gstin = `Invalid GSTIN format. Should start with state code ${stateCode}`;
             } else {
               newErrors.gstin = 'Invalid GSTIN format';
@@ -480,9 +480,12 @@ function Registration() {
         }
 
         // Check if PAN matches GSTIN
-        if (formData.gstin && formData.pan) {
-          const gstinPanPortion = formData.gstin.slice(2, 12);
-          if (gstinPanPortion !== formData.pan) {
+        const currentGstin = name === 'gstin' ? updatedValue : formData.gstin;
+        const currentPan = name === 'pan' ? updatedValue : formData.pan;
+
+        if (currentGstin && currentPan) {
+          const gstinPanPortion = currentGstin.slice(2, 12);
+          if (gstinPanPortion !== currentPan) {
             newErrors.gstin = 'GSTIN should contain the PAN number';
             newErrors.pan = 'PAN number does not match with GSTIN';
           }
@@ -584,21 +587,21 @@ function Registration() {
     }
   };
 
-  // Add GSTIN validation based on state code
+  // Update the validateGSTIN function
   const validateGSTIN = (gstin, state) => {
-    // If no state is selected yet, only validate the format
-    if (!state) {
-      const basicGstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-      return basicGstinRegex.test(gstin);
-    }
+    // Basic GSTIN format validation
+    const basicGstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (!basicGstinRegex.test(gstin)) return false;
+
+    // If no state is selected, only validate the format
+    if (!state) return true;
     
     const selectedState = statesList.find(s => s.name === state);
     if (!selectedState) return false;
 
-    const stateCode = selectedState.code;
-    const gstinRegex = new RegExp(`^${stateCode}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$`);
-    
-    return gstinRegex.test(gstin);
+    // Validate state code matches
+    const stateCode = selectedState.code.padStart(2, '0');
+    return gstin.startsWith(stateCode);
   };
 
   // Debounce the validation function

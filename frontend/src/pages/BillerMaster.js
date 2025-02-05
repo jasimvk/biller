@@ -15,6 +15,7 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Snackbar,
 } from '@mui/material';
 import { ArrowBack, Edit, Save } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,7 @@ function BillerMaster() {
   const [businessDetails, setBusinessDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     fetchBusinessDetails();
@@ -51,6 +53,73 @@ function BillerMaster() {
     }
   };
 
+  const handleInputChange = (field, value) => {
+    setBusinessDetails(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleAddressChange = (field, value) => {
+    setBusinessDetails(prev => ({
+      ...prev,
+      registeredAddress: {
+        ...prev.registeredAddress,
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/business/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(businessDetails)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update business details');
+      }
+
+      setShowSuccess(true);
+      setIsEditing(false);
+      fetchBusinessDetails(); // Refresh data
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating business details:', err);
+    }
+  };
+
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/business/upload-logo', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload logo');
+      }
+
+      fetchBusinessDetails(); // Refresh to get updated logo URL
+      setShowSuccess(true);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error uploading logo:', err);
+    }
+  };
+
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', py: 3 }}>
       <Container maxWidth="lg">
@@ -67,7 +136,13 @@ function BillerMaster() {
           <Button
             variant="contained"
             startIcon={isEditing ? <Save /> : <Edit />}
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              if (isEditing) {
+                handleSave();
+              } else {
+                setIsEditing(true);
+              }
+            }}
           >
             {isEditing ? 'Save Changes' : 'Edit Details'}
           </Button>
@@ -98,6 +173,7 @@ function BillerMaster() {
                       value={businessDetails?.tradeName || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('tradeName', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -107,6 +183,7 @@ function BillerMaster() {
                       value={businessDetails?.legalName || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('legalName', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -116,6 +193,7 @@ function BillerMaster() {
                       value={businessDetails?.gstin || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('gstin', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -125,6 +203,7 @@ function BillerMaster() {
                       value={businessDetails?.pan || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('pan', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -134,6 +213,7 @@ function BillerMaster() {
                       value={businessDetails?.mobile || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('mobile', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -143,6 +223,7 @@ function BillerMaster() {
                       value={businessDetails?.email || ''}
                       disabled={!isEditing}
                       sx={{ mb: 2 }}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                     />
                   </Grid>
                 </Grid>
@@ -160,6 +241,7 @@ function BillerMaster() {
                     fullWidth
                     label="Building/Premises"
                     value={businessDetails?.registeredAddress?.buildingNo || ''}
+                    onChange={(e) => handleAddressChange('buildingNo', e.target.value)}
                     disabled={!isEditing}
                     sx={{ mb: 2 }}
                   />
@@ -169,6 +251,7 @@ function BillerMaster() {
                     fullWidth
                     label="Street"
                     value={businessDetails?.registeredAddress?.street || ''}
+                    onChange={(e) => handleAddressChange('street', e.target.value)}
                     disabled={!isEditing}
                     sx={{ mb: 2 }}
                   />
@@ -178,6 +261,7 @@ function BillerMaster() {
                     fullWidth
                     label="City"
                     value={businessDetails?.registeredAddress?.city || ''}
+                    onChange={(e) => handleAddressChange('city', e.target.value)}
                     disabled={!isEditing}
                     sx={{ mb: 2 }}
                   />
@@ -187,6 +271,7 @@ function BillerMaster() {
                     fullWidth
                     label="State"
                     value={businessDetails?.registeredAddress?.state || ''}
+                    onChange={(e) => handleAddressChange('state', e.target.value)}
                     disabled={!isEditing}
                     sx={{ mb: 2 }}
                   />
@@ -196,6 +281,7 @@ function BillerMaster() {
                     fullWidth
                     label="PIN Code"
                     value={businessDetails?.registeredAddress?.pinCode || ''}
+                    onChange={(e) => handleAddressChange('pinCode', e.target.value)}
                     disabled={!isEditing}
                     sx={{ mb: 2 }}
                   />
@@ -240,6 +326,7 @@ function BillerMaster() {
                       type="file"
                       hidden
                       accept="image/*"
+                      onChange={handleLogoUpload}
                     />
                   </Button>
                 </Box>
@@ -247,6 +334,18 @@ function BillerMaster() {
             </Paper>
           </Grid>
         </Grid>
+
+        {/* Add success snackbar */}
+        <Snackbar
+          open={showSuccess}
+          autoHideDuration={3000}
+          onClose={() => setShowSuccess(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Business details updated successfully!
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );

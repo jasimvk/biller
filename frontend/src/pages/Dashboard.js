@@ -63,6 +63,15 @@ function StatCard({ title, value, icon, color }) {
   );
 }
 
+const formatIndianCurrency = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
+
 function Dashboard() {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -140,10 +149,30 @@ function Dashboard() {
   ];
 
   const statItems = [
-    { title: 'Total Sales', value: stats.totalSales, icon: <AttachMoney />, color: '#4CAF50' },
-    { title: 'Pending Invoices', value: stats.pendingInvoices, icon: <Receipt />, color: '#FF9800' },
-    { title: 'Total Products', value: stats.totalProducts, icon: <Inventory />, color: '#2196F3' },
-    { title: 'Active Customers', value: stats.activeCustomers, icon: <People />, color: '#9C27B0' },
+    { 
+      title: 'Total Sales', 
+      value: formatIndianCurrency(stats.totalSales || 0),
+      icon: <AttachMoney />, 
+      color: '#4CAF50' 
+    },
+    { 
+      title: 'Pending Invoices', 
+      value: formatIndianCurrency(stats.pendingInvoices || 0),
+      icon: <Receipt />, 
+      color: '#FF9800' 
+    },
+    { 
+      title: 'Total Products', 
+      value: stats.totalProducts || '0', 
+      icon: <Inventory />, 
+      color: '#2196F3' 
+    },
+    { 
+      title: 'Active Customers', 
+      value: stats.activeCustomers || '0', 
+      icon: <People />, 
+      color: '#9C27B0' 
+    },
   ];
 
   // Drawer configuration
