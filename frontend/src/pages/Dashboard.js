@@ -41,6 +41,7 @@ import {
   ChevronLeft,
   Dashboard as DashboardIcon,
   ChevronRight,
+  CurrencyRupee,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -137,7 +138,7 @@ function Dashboard() {
     { title: 'Biller Master', icon: <Business />, path: '/biller-master' },
     { title: 'Invoice Setting', icon: <Receipt />, path: '/invoice-setting' },
     { title: 'Item Creation', icon: <Inventory />, path: '/item-creation' },
-    { title: 'Pricing', icon: <AttachMoney />, path: '/pricing' },
+    { title: 'Pricing', icon: <CurrencyRupee />, path: '/pricing' },
     { title: 'Ledger Creation', icon: <Book />, path: '/ledger-creation' },
   ];
 
@@ -152,7 +153,7 @@ function Dashboard() {
     { 
       title: 'Total Sales', 
       value: formatIndianCurrency(stats.totalSales || 0),
-      icon: <AttachMoney />, 
+      icon: <CurrencyRupee />, 
       color: '#4CAF50' 
     },
     { 

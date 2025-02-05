@@ -24,13 +24,32 @@ function BillerMaster() {
   const theme = useTheme();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [businessDetails, setBusinessDetails] = useState(null);
+  const [businessDetails, setBusinessDetails] = useState({
+    tradeName: '',
+    legalName: '',
+    gstin: '',
+    pan: '',
+    mobile: '',
+    email: '',
+    registeredAddress: {
+      buildingNo: '',
+      street: '',
+      city: '',
+      state: '',
+      pinCode: ''
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [preferences, setPreferences] = useState({
+    showLogoOnInvoice: false,
+    showBranchAddress: false
+  });
 
   useEffect(() => {
     fetchBusinessDetails();
+    fetchPreferences();
   }, []);
 
   const fetchBusinessDetails = async () => {
@@ -44,12 +63,38 @@ function BillerMaster() {
       }
 
       const data = await response.json();
-      setBusinessDetails(data);
+      setBusinessDetails({
+        ...data,
+        registeredAddress: {
+          buildingNo: data.registeredAddress?.buildingNo || '',
+          street: data.registeredAddress?.street || '',
+          city: data.registeredAddress?.city || '',
+          state: data.registeredAddress?.state || '',
+          pinCode: data.registeredAddress?.pinCode || ''
+        }
+      });
     } catch (err) {
       setError(err.message);
       console.error('Error fetching business details:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPreferences = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/business/preferences', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch preferences');
+      }
+
+      const data = await response.json();
+      setPreferences(data);
+    } catch (err) {
+      console.error('Error fetching preferences:', err);
     }
   };
 
@@ -78,7 +123,12 @@ function BillerMaster() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(businessDetails)
+        body: JSON.stringify({
+          ...businessDetails,
+          registeredAddress: {
+            ...businessDetails.registeredAddress
+          }
+        })
       });
 
       if (!response.ok) {
@@ -117,6 +167,35 @@ function BillerMaster() {
     } catch (err) {
       setError(err.message);
       console.error('Error uploading logo:', err);
+    }
+  };
+
+  const handlePreferenceChange = async (field) => {
+    const newPreferences = {
+      ...preferences,
+      [field]: !preferences[field]
+    };
+    
+    setPreferences(newPreferences);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/business/preferences', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(newPreferences)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update preferences');
+      }
+
+      setShowSuccess(true);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating preferences:', err);
     }
   };
 
@@ -298,18 +377,23 @@ function BillerMaster() {
               </Typography>
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox />}
+                  control={
+                    <Checkbox 
+                      checked={preferences.showLogoOnInvoice}
+                      onChange={() => handlePreferenceChange('showLogoOnInvoice')}
+                    />
+                  }
                   label="Show Logo on Invoice"
                   disabled={!isEditing}
                 />
                 <FormControlLabel
-                  control={<Checkbox />}
+                  control={
+                    <Checkbox 
+                      checked={preferences.showBranchAddress}
+                      onChange={() => handlePreferenceChange('showBranchAddress')}
+                    />
+                  }
                   label="Show Branch Address"
-                  disabled={!isEditing}
-                />
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="Show GSTIN"
                   disabled={!isEditing}
                 />
               </FormGroup>

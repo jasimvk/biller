@@ -2,17 +2,6 @@ const express = require('express');
 const router = express.Router();
 const businessController = require('../controllers/businessController');
 const { db } = require('../config/database');
-const multer = require('multer');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: './uploads/logos',
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-
-const upload = multer({ storage });
 
 // Register business route
 router.post('/register', businessController.register);
@@ -33,11 +22,7 @@ router.get('/details', async (req, res) => {
           email,
           registeredAddress,
           branchAddress,
-          godownAddress,
-          logo,
-          showLogo,
-          showBranchAddress,
-          showGstin
+          godownAddress
         FROM businesses 
         LIMIT 1`,
         (err, row) => {
@@ -55,6 +40,12 @@ router.get('/details', async (req, res) => {
     business.registeredAddress = JSON.parse(business.registeredAddress || '{}');
     business.branchAddress = business.branchAddress ? JSON.parse(business.branchAddress) : null;
     business.godownAddress = business.godownAddress ? JSON.parse(business.godownAddress) : null;
+
+    // Add default values for missing columns
+    business.logo = null;
+    business.showLogo = false;
+    business.showBranchAddress = false;
+    business.showGstin = true;
 
     res.json(business);
   } catch (error) {
@@ -75,10 +66,7 @@ router.put('/update', async (req, res) => {
       email,
       registeredAddress,
       branchAddress,
-      godownAddress,
-      showLogo,
-      showBranchAddress,
-      showGstin
+      godownAddress
     } = req.body;
 
     await db.run(
@@ -91,10 +79,7 @@ router.put('/update', async (req, res) => {
         email = ?,
         registeredAddress = ?,
         branchAddress = ?,
-        godownAddress = ?,
-        showLogo = ?,
-        showBranchAddress = ?,
-        showGstin = ?
+        godownAddress = ?
       WHERE id = ?`,
       [
         tradeName,
@@ -106,9 +91,6 @@ router.put('/update', async (req, res) => {
         JSON.stringify(registeredAddress),
         branchAddress ? JSON.stringify(branchAddress) : null,
         godownAddress ? JSON.stringify(godownAddress) : null,
-        showLogo,
-        showBranchAddress,
-        showGstin,
         1
       ]
     );
@@ -117,30 +99,6 @@ router.put('/update', async (req, res) => {
   } catch (error) {
     console.error('Error updating business:', error);
     res.status(500).json({ error: 'Failed to update business details' });
-  }
-});
-
-// Upload logo
-router.post('/upload-logo', upload.single('logo'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    const logoPath = `/uploads/logos/${req.file.filename}`;
-    
-    await db.run(
-      'UPDATE businesses SET logo = ? WHERE id = ?',
-      [logoPath, 1]
-    );
-
-    res.json({ 
-      message: 'Logo uploaded successfully',
-      logoPath 
-    });
-  } catch (error) {
-    console.error('Error uploading logo:', error);
-    res.status(500).json({ error: 'Failed to upload logo' });
   }
 });
 
