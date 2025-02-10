@@ -18,8 +18,14 @@ import {
   Snackbar,
   Chip,
   MenuItem,
+  Stack,
+  Switch,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
-import { ArrowBack, Edit, Save } from '@mui/icons-material';
+import { ArrowBack, Edit, Save, Upload, Business, Badge, Article, Numbers, CalendarMonth, CalendarToday, LocationOn, Warehouse, Settings, Image } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const businessTypes = [
@@ -76,6 +82,206 @@ const statesList = [
   { code: '97', name: 'OTHER TERRITORY', shortCode: 'OT' },
 ];
 
+// Add this component definition before the AddOnFeaturesSection
+const AddressFields = ({ type, values, onChange }) => (
+  <Stack spacing={2}>
+    <TextField
+      fullWidth
+      size="small"
+      label="Building No./Flat No."
+      value={values?.buildingNo || ''}
+      onChange={(e) => onChange(type, 'buildingNo', e.target.value)}
+    />
+    <TextField
+      fullWidth
+      size="small"
+      label="Street"
+      value={values?.street || ''}
+      onChange={(e) => onChange(type, 'street', e.target.value)}
+    />
+    <TextField
+      fullWidth
+      size="small"
+      label="City"
+      value={values?.city || ''}
+      onChange={(e) => onChange(type, 'city', e.target.value)}
+    />
+    <TextField
+      fullWidth
+      size="small"
+      label="State"
+      select
+      value={values?.state || ''}
+      onChange={(e) => onChange(type, 'state', e.target.value)}
+    >
+      {statesList.map((state) => (
+        <MenuItem key={state.code} value={state.name}>
+          {state.name}
+        </MenuItem>
+      ))}
+    </TextField>
+    <TextField
+      fullWidth
+      size="small"
+      label="PIN Code"
+      value={values?.pinCode || ''}
+      onChange={(e) => onChange(type, 'pinCode', e.target.value)}
+    />
+  </Stack>
+);
+
+// Update the AddOnFeaturesSection component
+const AddOnFeaturesSection = ({ 
+  addOnFeatures, 
+  handleAddOnFeatureChange, 
+  handleLogoUpload 
+}) => (
+  <Box sx={{ 
+    position: 'fixed',
+    top: 100,
+    right: 32,
+    zIndex: 1200,
+    '@media (max-width: 1400px)': {
+      position: 'static',
+      mb: 3,
+      width: '100%'
+    }
+  }}>
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        width: { xs: '100%', md: 280 },
+        bgcolor: '#fff',
+        overflow: 'hidden',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ 
+        p: 2,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        bgcolor: '#FAFBFC'
+      }}>
+        <Settings 
+          sx={{ 
+            fontSize: 18,
+            color: 'primary.main'
+          }} 
+        />
+        <Typography 
+          variant="button" 
+          sx={{ 
+            color: 'text.secondary',
+            letterSpacing: '0.5px',
+            fontSize: '0.75rem'
+          }}
+        >
+          ADD ON FEATURES
+        </Typography>
+      </Box>
+      
+      {/* Features List */}
+      <Box sx={{ p: 1 }}>
+        {[
+          { icon: <Image />, label: 'Company Logo', key: 'addLogo' },
+          { icon: <Business />, label: 'Branch Office', key: 'addBranch' },
+          { icon: <Warehouse />, label: 'Godown', key: 'addGodown' }
+        ].map((feature, index) => (
+          <Box
+            key={feature.key}
+            sx={{
+              p: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: index !== 2 ? '1px solid' : 'none',
+              borderColor: 'divider',
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.01)'
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box 
+                sx={{ 
+                  color: 'primary.main',
+                  display: 'flex',
+                  '& svg': { fontSize: 20 }
+                }}
+              >
+                {feature.icon}
+              </Box>
+              <Typography 
+                variant="body2"
+                sx={{ color: 'text.primary' }}
+              >
+                {feature.label}
+              </Typography>
+            </Box>
+            <Switch
+              size="small"
+              checked={addOnFeatures[feature.key]}
+              onChange={() => handleAddOnFeatureChange(feature.key)}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: 'primary.main'
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: 'primary.main'
+                }
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Logo Upload Section */}
+      {addOnFeatures.addLogo && (
+        <Box sx={{ 
+          p: 2,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: '#FAFBFC'
+        }}>
+          <input
+            accept="image/jpeg"
+            style={{ display: 'none' }}
+            id="logo-upload"
+            type="file"
+            onChange={handleLogoUpload}
+          />
+          <label htmlFor="logo-upload">
+            <Button
+              component="span"
+              variant="outlined"
+              size="small"
+              startIcon={<Upload />}
+              fullWidth
+              sx={{
+                textTransform: 'none',
+                borderColor: 'divider',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'rgba(25, 118, 210, 0.04)'
+                }
+              }}
+            >
+              Upload Company Logo
+            </Button>
+          </label>
+        </Box>
+      )}
+    </Paper>
+  </Box>
+);
+
 function BillerMaster() {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -115,6 +321,12 @@ function BillerMaster() {
 
   // Form validation state
   const [errors, setErrors] = useState({});
+
+  // Add new state for add-on features
+  const [addOnFeatures, setAddOnFeatures] = useState({
+    addLogo: false,
+ 
+  });
 
   // Fetch business details
   useEffect(() => {
@@ -229,11 +441,13 @@ function BillerMaster() {
     }));
   };
 
-  const handleAddressChange = (field, value) => {
+  const handleAddressChange = (type, field, value) => {
     setBusinessDetails(prev => ({
       ...prev,
-      registeredAddress: {
-        ...prev.registeredAddress,
+      [type === 'registered' ? 'registeredAddress' : 
+       type === 'branch' ? 'branchAddress' : 'godownAddress']: {
+        ...prev[type === 'registered' ? 'registeredAddress' : 
+              type === 'branch' ? 'branchAddress' : 'godownAddress'],
         [field]: value
       }
     }));
@@ -261,8 +475,9 @@ function BillerMaster() {
         credentials: 'include',
         body: JSON.stringify({
           ...businessDetails,
-          preferences
-        })
+          branchAddress: addOnFeatures.addBranch ? businessDetails.branchAddress : null,
+          godownAddress: addOnFeatures.addGodown ? businessDetails.godownAddress : null,
+        }),
       });
 
       if (!response.ok) {
@@ -303,433 +518,570 @@ function BillerMaster() {
     }
   };
 
+  // Add new handler for add-on features
+  const handleAddOnFeatureChange = async (feature) => {
+    const newValue = !addOnFeatures[feature];
+    setAddOnFeatures(prev => ({
+      ...prev,
+      [feature]: newValue
+    }));
+
+    // If turning off a feature, show confirmation dialog
+    if (!newValue) {
+      // Add confirmation dialog logic here if needed
+    }
+  };
+
   return (
-    <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 3 }}>
-      <Container maxWidth="lg">
-        {!isEditing ? (
-          // Display View
-          <>
-            {/* Header */}
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <IconButton
-                  onClick={() => navigate('/dashboard')}
-                  sx={{
-                    bgcolor: 'white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    '&:hover': { bgcolor: 'white' }
-                  }}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                     Biller Master
-                  </Typography>
-                  
-                </Box>
-              </Box>
-              <Button
-                startIcon={<Edit />}
-                onClick={() => setIsEditing(true)}
-                variant="contained"
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  boxShadow: 'none',
-                  '&:hover': {
-                    boxShadow: 'none'
-                  }
-                }}
+    <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>
+      {/* Header with gradient */}
+      <Box 
+        sx={{ 
+          bgcolor: 'primary.main',
+          background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+          color: 'white',
+          py: 2,
+          mb: 4
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton
+                onClick={() => navigate('/dashboard')}
+                sx={{ color: 'white' }}
               >
-                Edit Profile
-              </Button>
+                <ArrowBack />
+              </IconButton>
+              <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                Biller Master
+              </Typography>
             </Box>
-
-            {/* Main Content */}
-            <Grid container spacing={3}>
-              {/* Business Details Card */}
-              <Grid item xs={12}>
-                <Paper
-                  elevation={0}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {!isEditing && (
+                <Button
+                  startIcon={<Edit />}
+                  onClick={() => setIsEditing(true)}
+                  variant="outlined"
                   sx={{
-                    p: 3,
-                    borderRadius: 3,
-                    bgcolor: 'white',
-                    boxShadow: '0 0 2px 0 rgba(0,0,0,0.05), 0 2px 10px 0 rgba(0,0,0,0.08)'
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Business Details
-                  </Typography>
-                  <Grid container spacing={3}>
-                    {[
-                      { label: 'Trade Name', value: businessDetails.tradeName },
-                      { label: 'Legal Name', value: businessDetails.legalName },
-                      { label: 'GSTIN', value: businessDetails.gstin },
-                      { label: 'PAN', value: businessDetails.pan }
-                    ].map((item, index) => (
-                      <Grid item xs={12} sm={6} key={index}>
-                        <Box sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: '#f8fafc',
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                          }
-                        }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            {item.label}
-                          </Typography>
-                          <Typography variant="body1" sx={{ mt: 1, fontWeight: 500 }}>
-                            {item.value || 'Not specified'}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              </Grid>
-
-              {/* Contact Information */}
-              <Grid item xs={12} md={6}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 3,
-                    bgcolor: 'white',
-                    height: '100%',
-                    boxShadow: '0 0 2px 0 rgba(0,0,0,0.05), 0 2px 10px 0 rgba(0,0,0,0.08)'
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Contact Information
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {[
-                      { icon: '📱', label: 'Mobile', value: businessDetails.mobile },
-                      { icon: '📧', label: 'Email', value: businessDetails.email }
-                    ].map((item, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: '#f8fafc',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 2,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                          }
-                        }}
-                      >
-                        <Typography variant="h6">{item.icon}</Typography>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            {item.label}
-                          </Typography>
-                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {item.value || 'Not specified'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </Paper>
-              </Grid>
-
-              {/* Address */}
-              <Grid item xs={12} md={6}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 3,
-                    bgcolor: 'white',
-                    height: '100%',
-                    boxShadow: '0 0 2px 0 rgba(0,0,0,0.05), 0 2px 10px 0 rgba(0,0,0,0.08)'
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Business Address
-                  </Typography>
-                  <Box sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: '#f8fafc',
-                    transition: 'all 0.2s',
+                    color: 'white',
+                    borderColor: 'white',
                     '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                      borderColor: 'white',
+                      bgcolor: 'rgba(255, 255, 255, 0.1)'
                     }
-                  }}>
-                    <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                      {`${businessDetails.registeredAddress.buildingNo || ''} 
-                       ${businessDetails.registeredAddress.street || ''}
-                       ${businessDetails.registeredAddress.city || ''} 
-                       ${businessDetails.registeredAddress.state || ''} 
-                       ${businessDetails.registeredAddress.pinCode || ''}`
-                       .trim().replace(/\s+/g, ' ') || 'Address not specified'}
+                  }}
+                >
+                  Edit Profile
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          position: 'relative',
+          display: 'flex',
+          flexDirection: { xs: 'column', xl: 'row' },
+          gap: 3
+        }}
+      >
+        {/* Add On Features */}
+        <Box sx={{ 
+          display: { xs: 'block', xl: 'none' },
+          width: '100%'
+        }}>
+          <AddOnFeaturesSection 
+            addOnFeatures={addOnFeatures}
+            handleAddOnFeatureChange={handleAddOnFeatureChange}
+            handleLogoUpload={handleLogoUpload}
+          />
+        </Box>
+
+        {/* Main Content */}
+        <Box sx={{ flex: 1 }}>
+          {!isEditing ? (
+            // View Mode Layout
+            <Grid container spacing={4}>
+              {/* Left Column - Profile Card */}
+              <Grid item xs={12} md={4}>
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Profile Header */}
+                  <Box 
+                    sx={{ 
+                      p: 3,
+                      bgcolor: 'primary.main',
+                      background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                      color: 'white',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Logo Circle */}
+                    <Box
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        bgcolor: 'white',
+                        border: '4px solid',
+                        borderColor: 'primary.light',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2,
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {businessDetails.logo ? (
+                        <img
+                          src={businessDetails.logo}
+                          alt="Company Logo"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <Business sx={{ fontSize: 40, color: 'primary.main' }} />
+                      )}
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                      {businessDetails.tradeName || 'Company Name'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      {businessDetails.legalName || 'Legal Entity Name'}
                     </Typography>
                   </Box>
-                </Paper>
-              </Grid>
 
-              {/* Preferences */}
-              <Grid item xs={12}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 3,
-                    bgcolor: 'white',
-                    boxShadow: '0 0 2px 0 rgba(0,0,0,0.05), 0 2px 10px 0 rgba(0,0,0,0.08)'
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Preferences
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {Object.entries(preferences).map(([key, value]) => (
-                      <Grid item xs={12} sm={6} key={key}>
-                        <Box sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: '#f8fafc',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                          }
-                        }}>
-                          <Typography variant="body1">
-                            {key.split(/(?=[A-Z])/).join(' ')}
-                          </Typography>
-                          <Chip
-                            label={value ? 'Enabled' : 'Disabled'}
-                            color={value ? 'primary' : 'default'}
-                            size="small"
-                          />
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              </Grid>
-            </Grid>
-          </>
-        ) : (
-          // Edit Form View
-          <>
-            {/* Header */}
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <IconButton
-                  onClick={() => setIsEditing(false)}
-                  sx={{
-                    bgcolor: 'white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    '&:hover': { bgcolor: 'white' }
-                  }}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  Edit Biller Master
-                </Typography>
-              </Box>
-              <Button
-                startIcon={<Save />}
-                onClick={handleSave}
-                variant="contained"
-                sx={{
-                  minWidth: 200,
-                  py: 1.8,
-                  px: 4,
-                  fontWeight: 600,
-                  fontSize: '1.1rem',
-                  textTransform: 'none',
-                  borderRadius: 3,
-                }}
-              >
-                Save Changes
-              </Button>
-            </Box>
-
-            {/* Form Content */}
-            <Paper sx={{ p: 4, borderRadius: 3 }}>
-              <Grid container spacing={4}>
-                {/* Business Type Section */}
-                <Grid item xs={12}>
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                    Business Type
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        select
-                        fullWidth
-                        label="Business Type"
-                        value={businessDetails.businessType || ''}
-                        onChange={(e) => handleInputChange('businessType', e.target.value)}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            bgcolor: 'grey.50'
-                          }
-                        }}
-                      >
-                        {businessTypes.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        select
-                        fullWidth
-                        label="Registration Type"
-                        value={businessDetails.registrationType || ''}
-                        onChange={(e) => handleInputChange('registrationType', e.target.value)}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            bgcolor: 'grey.50'
-                          }
-                        }}
-                      >
-                        {registrationTypes.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                {/* Business Details Section */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                    Business Details
-                  </Typography>
-                  <Grid container spacing={3}>
+                  {/* Key Business Information */}
+                  <List sx={{ py: 0 }}>
                     {[
-                      { label: 'Trade Name', field: 'tradeName' },
-                      { label: 'Legal Name', field: 'legalName' },
-                      { label: 'GSTIN', field: 'gstin' },
-                      { label: 'PAN', field: 'pan' },
-                      { label: 'Mobile', field: 'mobile' },
-                      { label: 'Email', field: 'email' },
-                      { label: 'Website', field: 'website' }
-                    ].map((item) => (
-                      <Grid item xs={12} sm={6} key={item.field}>
-                        <TextField
-                          fullWidth
-                          label={item.label}
-                          value={businessDetails[item.field] || ''}
-                          onChange={(e) => handleInputChange(item.field, e.target.value)}
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
-                              bgcolor: 'grey.50'
-                            }
+                      { icon: <Badge />, label: 'GSTIN', value: businessDetails.gstin },
+                      { icon: <Article />, label: 'PAN', value: businessDetails.pan },
+                      { icon: <Numbers />, label: 'UDYAM', value: businessDetails.udyamNumber },
+                      { icon: <CalendarMonth />, label: 'Incorporated', value: businessDetails.incorporationDate },
+                      { icon: <CalendarToday />, label: 'GST Registered', value: businessDetails.gstRegistrationDate }
+                    ].map((item, index) => (
+                      <ListItem 
+                        key={index}
+                        sx={{ 
+                          py: 1.5,
+                          borderBottom: index !== 4 ? '1px solid' : 'none',
+                          borderColor: 'divider'
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          {item.icon}
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={item.label}
+                          secondary={item.value || '-'}
+                          primaryTypographyProps={{ 
+                            variant: 'caption',
+                            color: 'text.secondary',
+                            fontSize: '0.75rem'
+                          }}
+                          secondaryTypographyProps={{ 
+                            variant: 'body2',
+                            color: 'text.primary',
+                            fontWeight: 500
                           }}
                         />
-                      </Grid>
+                      </ListItem>
                     ))}
-                  </Grid>
-                </Grid>
+                  </List>
+                </Paper>
+              </Grid>
 
-                {/* Address Section */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                    Business Address
-                  </Typography>
-                  <Grid container spacing={3}>
-                    {[
-                      { label: 'Building No./Flat No.', field: 'buildingNo' },
-                      { label: 'Street', field: 'street' },
-                      { label: 'City', field: 'city' },
-                      { label: 'State', field: 'state' },
-                      { label: 'PIN Code', field: 'pinCode' }
-                    ].map((item) => (
-                      <Grid item xs={12} sm={6} key={item.field}>
-                        <TextField
-                          fullWidth
-                          label={item.label}
-                          value={businessDetails.registeredAddress[item.field] || ''}
-                          onChange={(e) => handleAddressChange(item.field, e.target.value)}
-                          select={item.field === 'state'}
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
-                              bgcolor: 'grey.50'
-                            }
-                          }}
-                        >
-                          {item.field === 'state' && statesList.map((state) => (
-                            <MenuItem key={state.code} value={state.name}>
-                              {state.name}
-                            </MenuItem>
-                          ))}
-                        </TextField>
+              {/* Right Column - Additional Details */}
+              <Grid item xs={12} md={8}>
+                <Stack spacing={3}>
+                  {/* Financial Information */}
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 3,
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 600 }}>
+                      Financial Information
+                    </Typography>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Financial Year
+                          </Typography>
+                          <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                            {businessDetails.financialYearFrom} - {businessDetails.financialYearTo}
+                          </Typography>
+                        </Box>
                       </Grid>
-                    ))}
-                  </Grid>
-                </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Books Period
+                          </Typography>
+                          <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                            {businessDetails.booksFrom} - {businessDetails.booksTo}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Paper>
 
-                {/* Preferences Section */}
+                  {/* Address Information */}
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 3,
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 600 }}>
+                      Address Information
+                    </Typography>
+                    <Grid container spacing={3}>
+                      {/* Principal Place of Business */}
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                            <LocationOn sx={{ color: 'primary.main', mr: 1 }} />
+                            <Typography variant="subtitle2">
+                              Principal Place of Business
+                            </Typography>
+                          </Box>
+                          <Stack spacing={0.5}>
+                            <Typography variant="body2">
+                              {businessDetails.registeredAddress.buildingNo}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {businessDetails.registeredAddress.street}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {businessDetails.registeredAddress.city}, {businessDetails.registeredAddress.state}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {businessDetails.registeredAddress.pinCode}
+                            </Typography>
+                          </Stack>
+                        </Box>
+                      </Grid>
+
+                      {/* Branch Address - Show only if enabled */}
+                      {addOnFeatures.addBranch && businessDetails.branchAddress && (
+                        <Grid item xs={12} md={6}>
+                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1, height: '100%' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                              <Business sx={{ color: 'primary.main', mr: 1 }} />
+                              <Typography variant="subtitle2">
+                                Branch Office
+                              </Typography>
+                            </Box>
+                            <Stack spacing={0.5}>
+                              <Typography variant="body2">
+                                {businessDetails.branchAddress.buildingNo}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.branchAddress.street}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.branchAddress.city}, {businessDetails.branchAddress.state}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.branchAddress.pinCode}
+                              </Typography>
+                            </Stack>
+                          </Box>
+                        </Grid>
+                      )}
+
+                      {/* Godown Address - Show only if enabled */}
+                      {addOnFeatures.addGodown && businessDetails.godownAddress && (
+                        <Grid item xs={12} md={6}>
+                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1, height: '100%' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                              <Warehouse sx={{ color: 'primary.main', mr: 1 }} />
+                              <Typography variant="subtitle2">
+                                Godown
+                              </Typography>
+                            </Box>
+                            <Stack spacing={0.5}>
+                              <Typography variant="body2">
+                                {businessDetails.godownAddress.buildingNo}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.godownAddress.street}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.godownAddress.city}, {businessDetails.godownAddress.state}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {businessDetails.godownAddress.pinCode}
+                              </Typography>
+                            </Stack>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                </Stack>
+              </Grid>
+            </Grid>
+          ) : (
+            // Edit Mode - Original edit form layout
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 3 }}>Edit Business Details</Typography>
+              <Grid container spacing={3}>
+                {/* Business Details */}
                 <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                    Preferences
-                  </Typography>
-                  <FormGroup>
-                    {Object.entries(preferences).map(([key, value]) => (
-                      <FormControlLabel
-                        key={key}
-                        control={
-                          <Checkbox
-                            checked={value}
-                            onChange={() => handlePreferenceChange(key)}
-                          />
-                        }
-                        label={key.split(/(?=[A-Z])/).join(' ')}
+                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Business Details</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Trade Name"
+                        value={businessDetails.tradeName}
+                        onChange={(e) => handleInputChange('tradeName', e.target.value)}
+                        size="small"
                       />
-                    ))}
-                  </FormGroup>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Legal Name"
+                        value={businessDetails.legalName}
+                        onChange={(e) => handleInputChange('legalName', e.target.value)}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="GSTIN"
+                        value={businessDetails.gstin}
+                        onChange={(e) => handleInputChange('gstin', e.target.value)}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="PAN"
+                        value={businessDetails.pan}
+                        onChange={(e) => handleInputChange('pan', e.target.value)}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="UDYAM Number"
+                        value={businessDetails.udyamNumber}
+                        onChange={(e) => handleInputChange('udyamNumber', e.target.value)}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Dates Section */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Important Dates</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Date of Incorporation"
+                        value={businessDetails.incorporationDate}
+                        onChange={(e) => handleInputChange('incorporationDate', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="GST Registration Date"
+                        value={businessDetails.gstRegistrationDate}
+                        onChange={(e) => handleInputChange('gstRegistrationDate', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Financial Period */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Financial Period</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Financial Year From"
+                        value={businessDetails.financialYearFrom}
+                        onChange={(e) => handleInputChange('financialYearFrom', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Financial Year To"
+                        value={businessDetails.financialYearTo}
+                        onChange={(e) => handleInputChange('financialYearTo', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Books From"
+                        value={businessDetails.booksFrom}
+                        onChange={(e) => handleInputChange('booksFrom', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        type="date"
+                        label="Books To"
+                        value={businessDetails.booksTo}
+                        onChange={(e) => handleInputChange('booksTo', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Principal Place of Business */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Principal Place of Business</Typography>
+                  <AddressFields
+                    type="registered"
+                    values={businessDetails.registeredAddress}
+                    onChange={handleAddressChange}
+                  />
+                </Grid>
+
+                {/* Branch Address - Show if enabled in Add On Features */}
+                {addOnFeatures.addBranch && (
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      p: 3, 
+                      bgcolor: '#f8f9fa', 
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}>
+                      <Typography variant="subtitle1" sx={{ mb: 2 }}>Branch Office Address</Typography>
+                      <AddressFields
+                        type="branch"
+                        values={businessDetails.branchAddress}
+                        onChange={handleAddressChange}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+
+                {/* Godown Address - Show if enabled in Add On Features */}
+                {addOnFeatures.addGodown && (
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      p: 3, 
+                      bgcolor: '#f8f9fa', 
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}>
+                      <Typography variant="subtitle1" sx={{ mb: 2 }}>Godown Address</Typography>
+                      <AddressFields
+                        type="godown"
+                        values={businessDetails.godownAddress}
+                        onChange={handleAddressChange}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+
+                {/* Action Buttons */}
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={handleSave}
+                    >
+                      Save Changes
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             </Paper>
-          </>
-        )}
+          )}
+        </Box>
 
-        <Snackbar
-          open={showSuccess}
-          autoHideDuration={3000}
-          onClose={() => setShowSuccess(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert severity="success">
-            Changes saved successfully!
-          </Alert>
-        </Snackbar>
+        {/* Add On Features for larger screens */}
+        <Box sx={{ 
+          display: { xs: 'none', xl: 'block' },
+          width: 280,
+          flexShrink: 0
+        }}>
+          <AddOnFeaturesSection 
+            addOnFeatures={addOnFeatures}
+            handleAddOnFeatureChange={handleAddOnFeatureChange}
+            handleLogoUpload={handleLogoUpload}
+          />
+        </Box>
       </Container>
+
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success">
+          Changes saved successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

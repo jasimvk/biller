@@ -147,6 +147,8 @@ function Dashboard() {
     { title: 'Biller Reports', icon: <Assessment />, path: '/reports' },
     { title: 'E-Way Portal', icon: <Language />, path: '/eway-portal' },
     { title: 'GST Portal', icon: <Assignment />, path: '/gst-portal' },
+    { title: 'HSN/SAC', icon: <Assignment />, path: '/hsn-sac' },
+
   ];
 
   const statItems = [
