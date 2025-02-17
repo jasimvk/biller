@@ -32,6 +32,11 @@ function InvoiceSetting() {
     prefix: 'PATS',
     startNumber: '00012',
     suffix: '2024-25',
+    numberOfZeros: 5,
+    invoiceType: 'tax',
+    showTransportDetails: true,
+    showEwayBill: true,
+    showDispatchFrom: false,
     columns: {
       qty: true,
       units: true,
@@ -47,6 +52,9 @@ function InvoiceSetting() {
       grossWeight: false,
       stoneWeight: false,
       netWeight: false,
+      hsnSac: true,
+      taxableValue: true,
+      taxRate: true,
     },
     bankDetails: {
       show: true,
@@ -107,6 +115,11 @@ function InvoiceSetting() {
       } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(settings.bankDetails.ifscCode)) {
         newErrors['bankDetails.ifscCode'] = 'Invalid IFSC code format';
       }
+    }
+
+    // Validate number of zeros
+    if (settings.numberOfZeros < 0) {
+      newErrors.numberOfZeros = 'Number of zeros must be positive';
     }
 
     setErrors(newErrors);
@@ -181,6 +194,27 @@ function InvoiceSetting() {
         </Box>
 
         <Grid container spacing={3}>
+          {/* Invoice Type Selection */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Invoice Type Setting
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.invoiceType === 'tax'}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      invoiceType: e.target.checked ? 'tax' : 'supply'
+                    }))}
+                  />
+                }
+                label="Tax Invoice (Switch off for Bill of Supply)"
+              />
+            </Paper>
+          </Grid>
+
           {/* Invoice Numbering Section */}
           <Grid item xs={12}>
             <Paper sx={{ p: 3, mb: 3 }}>
@@ -226,6 +260,73 @@ function InvoiceSetting() {
                       suffix: e.target.value
                     }))}
                     helperText="E.g., /2024-25"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Number of Zeros to Prefix"
+                    value={settings.numberOfZeros}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      numberOfZeros: parseInt(e.target.value)
+                    }))}
+                    helperText="E.g., 5 zeros: 00000"
+                    error={!!errors.numberOfZeros}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* Additional Options */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Additional Options
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.showTransportDetails}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          showTransportDetails: e.target.checked
+                        }))}
+                      />
+                    }
+                    label="Show Transport Details"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.showEwayBill}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          showEwayBill: e.target.checked
+                        }))}
+                      />
+                    }
+                    label="Show E-way Bill"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.showDispatchFrom}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          showDispatchFrom: e.target.checked
+                        }))}
+                      />
+                    }
+                    label="Show Dispatch From"
                   />
                 </Grid>
               </Grid>
