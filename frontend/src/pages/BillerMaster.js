@@ -25,8 +25,10 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import { ArrowBack, Edit, Save, Upload, Business, Badge, Article, Numbers, CalendarMonth, CalendarToday, LocationOn, Warehouse, Settings, Image } from '@mui/icons-material';
+import { ArrowBack, Edit, Save, Upload, Business, Badge, Article, Numbers, CalendarMonth, CalendarToday, LocationOn, Warehouse, Settings, Image, Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
 
 const businessTypes = [
   { value: 'SOLE_PROPRIETORSHIP', label: 'Sole Proprietorship' },
@@ -328,6 +330,9 @@ function BillerMaster() {
  
   });
 
+  const [addOnDrawerOpen, setAddOnDrawerOpen] = useState(false);
+  const logoInputRef = React.useRef();
+
   // Fetch business details
   useEffect(() => {
     fetchBusinessDetails();
@@ -532,8 +537,28 @@ function BillerMaster() {
     }
   };
 
+  // AddOnFeaturesSection now for Drawer only
+  const AddOnFeaturesDrawer = (
+    <Drawer
+      anchor="right"
+      open={addOnDrawerOpen}
+      onClose={() => setAddOnDrawerOpen(false)}
+      PaperProps={{ sx: { width: 320, p: 0 } }}
+    >
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>Add On Features</Typography>
+        <IconButton onClick={() => setAddOnDrawerOpen(false)}><CloseIcon /></IconButton>
+      </Box>
+      <AddOnFeaturesSection 
+        addOnFeatures={addOnFeatures}
+        handleAddOnFeatureChange={handleAddOnFeatureChange}
+        handleLogoUpload={handleLogoUpload}
+      />
+    </Drawer>
+  );
+
   return (
-    <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>
+    <Box sx={{ bgcolor: '#f6f8fa', minHeight: '100vh', pb: 8 }}>
       {/* Header with gradient */}
       <Box 
         sx={{ 
@@ -541,7 +566,8 @@ function BillerMaster() {
           background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
           color: 'white',
           py: 2,
-          mb: 4
+          mb: 4,
+          boxShadow: 2
         }}
       >
         <Container maxWidth="lg">
@@ -553,7 +579,7 @@ function BillerMaster() {
               >
                 <ArrowBack />
               </IconButton>
-              <Typography variant="h5" sx={{ fontWeight: 500 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1 }}>
                 Biller Master
               </Typography>
             </Box>
@@ -589,18 +615,6 @@ function BillerMaster() {
           gap: 3
         }}
       >
-        {/* Add On Features */}
-        <Box sx={{ 
-          display: { xs: 'block', xl: 'none' },
-          width: '100%'
-        }}>
-          <AddOnFeaturesSection 
-            addOnFeatures={addOnFeatures}
-            handleAddOnFeatureChange={handleAddOnFeatureChange}
-            handleLogoUpload={handleLogoUpload}
-          />
-        </Box>
-
         {/* Main Content */}
         <Box sx={{ flex: 1 }}>
           {!isEditing ? (
@@ -609,29 +623,31 @@ function BillerMaster() {
               {/* Left Column - Profile Card */}
               <Grid item xs={12} md={4}>
                 <Paper 
-                  elevation={0} 
+                  elevation={2} 
                   sx={{ 
-                    borderRadius: 2,
+                    borderRadius: 3,
                     border: '1px solid',
                     borderColor: 'divider',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 24px rgba(25, 118, 210, 0.08)'
                   }}
                 >
                   {/* Profile Header */}
                   <Box 
                     sx={{ 
-                      p: 3,
+                      p: 4,
                       bgcolor: 'primary.main',
                       background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
                       color: 'white',
-                      position: 'relative'
+                      position: 'relative',
+                      textAlign: 'center'
                     }}
                   >
                     {/* Logo Circle */}
                     <Box
                       sx={{
-                        width: 80,
-                        height: 80,
+                        width: 100,
+                        height: 100,
                         borderRadius: '50%',
                         bgcolor: 'white',
                         border: '4px solid',
@@ -640,8 +656,13 @@ function BillerMaster() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         mb: 2,
-                        overflow: 'hidden'
+                        mx: 'auto',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        boxShadow: 2
                       }}
+                      onClick={() => logoInputRef.current && logoInputRef.current.click()}
+                      title="Click to upload/change logo"
                     >
                       {businessDetails.logo ? (
                         <img
@@ -650,17 +671,33 @@ function BillerMaster() {
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : (
-                        <Business sx={{ fontSize: 40, color: 'primary.main' }} />
+                        <Business sx={{ fontSize: 48, color: 'primary.main' }} />
                       )}
                     </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                    <input
+                      ref={logoInputRef}
+                      accept="image/jpeg"
+                      style={{ display: 'none' }}
+                      id="logo-upload-profile"
+                      type="file"
+                      onChange={handleLogoUpload}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Upload />}
+                      onClick={() => logoInputRef.current && logoInputRef.current.click()}
+                      sx={{ mt: 1, mb: 2, borderRadius: 2, fontWeight: 600, boxShadow: 1 }}
+                    >
+                      {businessDetails.logo ? 'Change Logo' : 'Add Logo'}
+                    </Button>
+                    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.3rem', mt: 1 }}>
                       {businessDetails.tradeName || 'Company Name'}
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 400 }}>
                       {businessDetails.legalName || 'Legal Entity Name'}
                     </Typography>
                   </Box>
-
                   {/* Key Business Information */}
                   <List sx={{ py: 0 }}>
                     {[
@@ -700,7 +737,6 @@ function BillerMaster() {
                   </List>
                 </Paper>
               </Grid>
-
               {/* Right Column - Additional Details */}
               <Grid item xs={12} md={8}>
                 <Stack spacing={3}>
@@ -709,12 +745,13 @@ function BillerMaster() {
                     elevation={0} 
                     sx={{ 
                       p: 3,
-                      borderRadius: 2,
+                      borderRadius: 3,
                       border: '1px solid',
-                      borderColor: 'divider'
+                      borderColor: 'divider',
+                      boxShadow: '0 2px 8px rgba(25, 118, 210, 0.04)'
                     }}
                   >
-                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 600 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '1.1rem' }}>
                       Financial Information
                     </Typography>
                     <Grid container spacing={3}>
@@ -740,27 +777,27 @@ function BillerMaster() {
                       </Grid>
                     </Grid>
                   </Paper>
-
                   {/* Address Information */}
                   <Paper 
                     elevation={0} 
                     sx={{ 
                       p: 3,
-                      borderRadius: 2,
+                      borderRadius: 3,
                       border: '1px solid',
-                      borderColor: 'divider'
+                      borderColor: 'divider',
+                      boxShadow: '0 2px 8px rgba(25, 118, 210, 0.04)'
                     }}
                   >
-                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 600 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '1.1rem' }}>
                       Address Information
                     </Typography>
                     <Grid container spacing={3}>
                       {/* Principal Place of Business */}
                       <Grid item xs={12}>
-                        <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+                        <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 2, mb: 2 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                             <LocationOn sx={{ color: 'primary.main', mr: 1 }} />
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                               Principal Place of Business
                             </Typography>
                           </Box>
@@ -780,14 +817,13 @@ function BillerMaster() {
                           </Stack>
                         </Box>
                       </Grid>
-
                       {/* Branch Address - Show only if enabled */}
                       {addOnFeatures.addBranch && businessDetails.branchAddress && (
-                        <Grid item xs={12} md={6}>
-                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1, height: '100%' }}>
+                        <Grid item xs={12}>
+                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 2, mb: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                               <Business sx={{ color: 'primary.main', mr: 1 }} />
-                              <Typography variant="subtitle2">
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                                 Branch Office
                               </Typography>
                             </Box>
@@ -808,14 +844,13 @@ function BillerMaster() {
                           </Box>
                         </Grid>
                       )}
-
                       {/* Godown Address - Show only if enabled */}
                       {addOnFeatures.addGodown && businessDetails.godownAddress && (
-                        <Grid item xs={12} md={6}>
-                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 1, height: '100%' }}>
+                        <Grid item xs={12}>
+                          <Box sx={{ p: 2.5, bgcolor: '#f8f9fa', borderRadius: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                               <Warehouse sx={{ color: 'primary.main', mr: 1 }} />
-                              <Typography variant="subtitle2">
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                                 Godown
                               </Typography>
                             </Box>
@@ -844,19 +879,71 @@ function BillerMaster() {
           ) : (
             // Edit Mode - Original edit form layout
             <Paper 
-              elevation={0} 
+              elevation={2} 
               sx={{ 
-                p: 3,
-                borderRadius: 2,
+                p: 4,
+                borderRadius: 3,
                 border: '1px solid',
-                borderColor: 'divider'
+                borderColor: 'divider',
+                boxShadow: '0 4px 24px rgba(25, 118, 210, 0.08)'
               }}
             >
-              <Typography variant="h6" sx={{ mb: 3 }}>Edit Business Details</Typography>
               <Grid container spacing={3}>
+                {/* Profile Card in Edit Mode */}
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ textAlign: 'center', mb: 2 }}>
+                    <Box
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        bgcolor: 'white',
+                        border: '4px solid',
+                        borderColor: 'primary.light',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2,
+                        mx: 'auto',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        boxShadow: 2
+                      }}
+                      onClick={() => logoInputRef.current && logoInputRef.current.click()}
+                      title="Click to upload/change logo"
+                    >
+                      {businessDetails.logo ? (
+                        <img
+                          src={businessDetails.logo}
+                          alt="Company Logo"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <Business sx={{ fontSize: 48, color: 'primary.main' }} />
+                      )}
+                    </Box>
+                    <input
+                      ref={logoInputRef}
+                      accept="image/jpeg"
+                      style={{ display: 'none' }}
+                      id="logo-upload-profile-edit"
+                      type="file"
+                      onChange={handleLogoUpload}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Upload />}
+                      onClick={() => logoInputRef.current && logoInputRef.current.click()}
+                      sx={{ mt: 1, mb: 2, borderRadius: 2, fontWeight: 600, boxShadow: 1 }}
+                    >
+                      {businessDetails.logo ? 'Change Logo' : 'Add Logo'}
+                    </Button>
+                  </Box>
+                </Grid>
                 {/* Business Details */}
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Business Details</Typography>
+                <Grid item xs={12} md={8}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Edit Business Details</Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <TextField
@@ -905,108 +992,19 @@ function BillerMaster() {
                     </Grid>
                   </Grid>
                 </Grid>
-
-                {/* Dates Section */}
+                {/* Address Sections */}
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Important Dates</Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="Date of Incorporation"
-                        value={businessDetails.incorporationDate}
-                        onChange={(e) => handleInputChange('incorporationDate', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="GST Registration Date"
-                        value={businessDetails.gstRegistrationDate}
-                        onChange={(e) => handleInputChange('gstRegistrationDate', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                {/* Financial Period */}
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Financial Period</Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="Financial Year From"
-                        value={businessDetails.financialYearFrom}
-                        onChange={(e) => handleInputChange('financialYearFrom', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="Financial Year To"
-                        value={businessDetails.financialYearTo}
-                        onChange={(e) => handleInputChange('financialYearTo', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="Books From"
-                        value={businessDetails.booksFrom}
-                        onChange={(e) => handleInputChange('booksFrom', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        label="Books To"
-                        value={businessDetails.booksTo}
-                        onChange={(e) => handleInputChange('booksTo', e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        size="small"
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                {/* Principal Place of Business */}
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" sx={{ mb: 2 }}>Principal Place of Business</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700 }}>Principal Place of Business</Typography>
                   <AddressFields
                     type="registered"
                     values={businessDetails.registeredAddress}
                     onChange={handleAddressChange}
                   />
                 </Grid>
-
-                {/* Branch Address - Show if enabled in Add On Features */}
                 {addOnFeatures.addBranch && (
                   <Grid item xs={12}>
-                    <Box sx={{ 
-                      p: 3, 
-                      bgcolor: '#f8f9fa', 
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'divider'
-                    }}>
-                      <Typography variant="subtitle1" sx={{ mb: 2 }}>Branch Office Address</Typography>
+                    <Box sx={{ p: 3, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid', borderColor: 'divider', mt: 2 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700 }}>Branch Office Address</Typography>
                       <AddressFields
                         type="branch"
                         values={businessDetails.branchAddress}
@@ -1015,18 +1013,10 @@ function BillerMaster() {
                     </Box>
                   </Grid>
                 )}
-
-                {/* Godown Address - Show if enabled in Add On Features */}
                 {addOnFeatures.addGodown && (
                   <Grid item xs={12}>
-                    <Box sx={{ 
-                      p: 3, 
-                      bgcolor: '#f8f9fa', 
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'divider'
-                    }}>
-                      <Typography variant="subtitle1" sx={{ mb: 2 }}>Godown Address</Typography>
+                    <Box sx={{ p: 3, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid', borderColor: 'divider', mt: 2 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700 }}>Godown Address</Typography>
                       <AddressFields
                         type="godown"
                         values={businessDetails.godownAddress}
@@ -1035,7 +1025,6 @@ function BillerMaster() {
                     </Box>
                   </Grid>
                 )}
-
                 {/* Action Buttons */}
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
@@ -1057,21 +1046,17 @@ function BillerMaster() {
             </Paper>
           )}
         </Box>
-
-        {/* Add On Features for larger screens */}
-        <Box sx={{ 
-          display: { xs: 'none', xl: 'block' },
-          width: 280,
-          flexShrink: 0
-        }}>
-          <AddOnFeaturesSection 
-            addOnFeatures={addOnFeatures}
-            handleAddOnFeatureChange={handleAddOnFeatureChange}
-            handleLogoUpload={handleLogoUpload}
-          />
-        </Box>
+        {/* Floating Add On Features Button */}
+        <Fab 
+          color="primary" 
+          aria-label="add-on-features" 
+          sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1300, boxShadow: 4 }}
+          onClick={() => setAddOnDrawerOpen(true)}
+        >
+          <Settings />
+        </Fab>
+        {AddOnFeaturesDrawer}
       </Container>
-
       <Snackbar
         open={showSuccess}
         autoHideDuration={3000}

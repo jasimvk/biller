@@ -864,7 +864,7 @@ function Registration() {
                   value={formData.pan.toUpperCase()}
                   onChange={handleChange}
                   error={!!errors.pan}
-                  helperText={errors.pan}
+                  helperText={errors.pan || 'Format: ABCDF1234G'}
                   required
                   sx={{
                     '& .MuiOutlinedInput-root': {
